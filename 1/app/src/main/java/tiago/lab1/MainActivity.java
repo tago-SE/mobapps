@@ -9,6 +9,11 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
+
+import tiago.lab1.model.URLHandler;
+import tiago.lab1.model.XMLParseTask;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -26,14 +31,13 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        System.out.println("Hello World");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
@@ -46,6 +50,18 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            XMLParseTask parseXML = new XMLParseTask();
+            parseXML.execute(null, null, null);
+
+            /*
+            URLHandler urlHandler = new URLHandler();
+            try {
+                urlHandler.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            */
+
             return true;
         }
 
