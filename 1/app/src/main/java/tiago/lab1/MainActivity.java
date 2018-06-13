@@ -3,12 +3,14 @@ package tiago.lab1;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
 import java.io.IOException;
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Spinner fromSpinner;
     private ArrayAdapter<String> fromAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //RelativeLayout containerCurrencyConverter1 = findViewById(R.id.main_cc_container1);
+        Fragment ccFrag1 = CurrencySelectorFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.main_cc_container1,ccFrag1).commit();
+
+        RelativeLayout containerCurrencyConverter2 = findViewById(R.id.main_cc_container2);
+
+
+
+
+        /*
         fromSpinner = findViewById(R.id.spinner_from);
 
         ArrayList<String> list = new ArrayList<>();
@@ -45,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         fromAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, list);
         fromSpinner.setAdapter(fromAdapter);
         fromSpinner.setVisibility(View.VISIBLE);
+        */
 
 
     }
