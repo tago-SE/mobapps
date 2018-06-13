@@ -30,6 +30,7 @@ public class CurrencySelectorFragment extends Fragment {
    // private OnFragmentInteractionListener mListener;
 
     public CurrencySelectorFragment() {
+
     }
 
     /**
