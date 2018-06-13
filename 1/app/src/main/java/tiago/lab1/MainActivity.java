@@ -8,20 +8,25 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import tiago.lab1.model.URLHandler;
 import tiago.lab1.model.XMLParseTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Spinner fromSpinner;
+    private ArrayAdapter<String> fromAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -31,6 +36,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        fromSpinner = findViewById(R.id.spinner_from);
+
+        ArrayList<String> list = new ArrayList<>();
+        list.add("Stockholm");
+        list.add("Enköping");
+        fromAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, list);
+        fromSpinner.setAdapter(fromAdapter);
+        fromSpinner.setVisibility(View.VISIBLE);
+
+
     }
 
     @Override

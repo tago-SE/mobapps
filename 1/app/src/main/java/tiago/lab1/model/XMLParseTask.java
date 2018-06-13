@@ -22,15 +22,21 @@ public class XMLParseTask extends AsyncTask<String, Integer, String> {
     private static final String LOG_TAG = "XMLParseTask";
 
     private void forNodes(Node node) {
-        Log.w(LOG_TAG, "v: " + node.getTextContent());
+        if (node == null)
+            return;
+        Log.w(LOG_TAG, "a: " + node.getAttributes());
+        Log.w(LOG_TAG, "v: " + node.getNodeValue());
+        Log.w(LOG_TAG, "n: " + node.getLocalName());
+        Log.w(LOG_TAG, "N: " + node.getNodeName());
+        //if (node.getAttributes() != null)
+            //Log.w(LOG_TAG, "A: " + node.getAttributes().item(0));
         NodeList nodeList = node.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node curNode = nodeList.item(i);
-            if (curNode.getNodeType() == Node.ELEMENT_NODE) {
-                forNodes(curNode);
-            } else {
-                Log.w(LOG_TAG, "e: " + curNode.getTextContent());
+            if (curNode.getLocalName() == "Cube") {
+                Log.w(LOG_TAG, "CUBE!!!!");
             }
+            forNodes(curNode);
         }
     }
 
@@ -39,61 +45,58 @@ public class XMLParseTask extends AsyncTask<String, Integer, String> {
     protected String doInBackground(String... strings) {
         Log.w(LOG_TAG, "doInBackground:started");
         URL url = null;
+        InputStream stream = null;
         try {
-            url = new URL("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
-            InputStream stream = url.openStream();
+            //url = new URL("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
+            url = new URL("http://maceo.sth.kth.se/Home/eurofxref");
+            stream = url.openStream();
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(stream);
 
             Element p = doc.getDocumentElement();
-            forNodes(p);
+            NodeList nodeList = doc.getElementsByTagName("Cube");
+            Node node = nodeList.item(1);
+            Element e = (Element) node;
+            Log.w(LOG_TAG, "time: " + e.getAttribute("time"));
+            for (int i = 2; i < nodeList.getLength(); i++) {
+                node = nodeList.item(i);
 
-            stream.close();
-            Log.w(LOG_TAG, "closed");
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    e = (Element) node;
+
+                    Currency currency = new Currency(
+                            e.getAttribute("currency"),
+                            Float.parseFloat( e.getAttribute("rate")));
+
+                    Log.w(LOG_TAG, currency.toString());
+                    Log.w(LOG_TAG, currency.getLabel());
+                    Log.w(LOG_TAG, "" +currency.getRate());
+
+
+                    //Currency currency = new Currency(e.getAttribute("currency"))
+                    //Log.w(LOG_TAG, e.getAttribute("currency") + "," +
+                    //e.getAttribute("rate"));
+
+                }
+            }
         }  catch (IOException e) {
             e.printStackTrace();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
             e.printStackTrace();
+        } finally {
+            if (stream != null) try {
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //Document doc = docBuilder.parse(stream);
 
         return null;
     }
-
-    /*
-    @Override
-    protected String doInBackground(String... strings) {
-        BufferedReader in = null;
-        URL url = null;
-
-        try {
-            url = new URL("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        URLConnection urlConnection = null;
-
-        try {
-            urlConnection = url.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                Log.d(LOG_TAG, line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    */
 }
