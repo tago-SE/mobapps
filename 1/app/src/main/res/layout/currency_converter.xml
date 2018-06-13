@@ -18,7 +18,7 @@
 
     <TextView
         android:id="@+id/cc_textView"
-        android:layout_width="234dp"
+        android:layout_width="232dp"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/cc_editText"
         android:layout_below="@+id/cc_editText"
