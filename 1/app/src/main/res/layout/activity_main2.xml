@@ -18,8 +18,7 @@
         <RelativeLayout
             android:id="@+id/main_cc_container1"
             android:layout_width="match_parent"
-            android:layout_height="88dp">
-        </RelativeLayout>
+            android:layout_height="88dp"></RelativeLayout>
         <RelativeLayout
             android:id="@+id/main_cc_container2"
             android:layout_width="match_parent"

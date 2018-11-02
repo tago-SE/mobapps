@@ -6,10 +6,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
@@ -24,12 +26,20 @@ public class MainActivity extends AppCompatActivity {
     private Spinner fromSpinner;
     private ArrayAdapter<String> fromAdapter;
 
+    private static final int NUM_CURRENCY = 2;
+    private LinearLayout layout;
+    private CurrencySelectorFragment[] currencyFrag;
+
+    private static final String LOG_TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
 
+        Log.w(LOG_TAG, "onCreate");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +72,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    /*
+    private void setupCurrencyFragments() {
+        layout = findViewById(R.id.drawer_layout_ll);
+        int[] containerId = new int[NUM_CURRENCY];
+        containerId[0] = R.id.drawer_layout_container1;
+        containerId[1] = R.id.drawer_layout_container2;
+        currencyFrag = new CurrencySelectorFragment[NUM_CURRENCY];
+        for (int i = 0; i < NUM_CURRENCY; i++) {
+            currencyFrag[i] = new CurrencySelectorFragment();
+            getSupportFragmentManager().beginTransaction().replace(containerId[i], currencyFrag[i]).commit();
+        }
+
+    }
+     */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

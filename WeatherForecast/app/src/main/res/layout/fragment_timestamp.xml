@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout2"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    tools:context=".TimestampFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <TextView
+        android:id="@+id/approvedTimeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/approved_time" />
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="208dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/approvedTimeLabel"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="41dp"
+        android:layout_toEndOf="@+id/approvedTimeLabel" />
+</RelativeLayout>
