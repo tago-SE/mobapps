@@ -69,11 +69,11 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
             String reference = rootObj.getAsJsonPrimitive("referenceTime").toString();
             String approvedDate = approved.substring(1,11);
             String approvedTime = approved.substring(12, 17);
-            float longitude = coordinates.get(0).getAsFloat();
-            float latitude = coordinates.get(1).getAsFloat();
+            //double longitude = coordinates.get(0).getAsFloat();
+            //double latitude = coordinates.get(1).getAsFloat();
 
             forecast = new Forecast(
-                    longitude, latitude, approvedDate, approvedTime);
+                    Double.parseDouble(sLong), Double.parseDouble(sLat), approvedDate, approvedTime);
 
             for (Object o : rootObj.getAsJsonArray("timeSeries")) {
                 JsonObject node = (JsonObject) o;
@@ -111,16 +111,19 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
     private void saveForecast(Forecast forecast) {
         if (forecast == null)
             return;
-
         AppDatabase db = AppDatabase.getInstance();
         try {
-           // Purge db records
             ForecastDao fDao = db.forecastDao();
-            fDao.dropAll();
             WeatherDao wDao = db.weatherDao();
-            wDao.dropAll();
-            // Save forecast model as db entity
+
+            ForecastEntity foundEntity = fDao.findByCoordinates(longitude, latitude);
+            if (foundEntity != null) {
+                Log.w(TAG, "Deleted previous forecast");
+                wDao.deleteMatchingForecast(foundEntity.getId());
+                fDao.delete(foundEntity);
+            }
             ForecastEntity fEnt = new ForecastEntity(forecast.date, forecast.time, forecast.longitude, forecast.latitude);
+            Log.w(TAG, "Saving: " + fEnt.toString());
             fDao.insertAll(fEnt);
             for (Weather w : forecast.items)
                 wDao.insertAll(new WeatherEntity(fEnt.getId(), w.date, w.time, w.sky, w.temperature));

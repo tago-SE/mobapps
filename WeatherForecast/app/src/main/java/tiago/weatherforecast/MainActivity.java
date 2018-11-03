@@ -103,8 +103,11 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Database Flushed", Toast.LENGTH_LONG).show();
         TaskFlushDB asyncTask = (TaskFlushDB) new TaskFlushDB();
         asyncTask.execute();
+        clearAdapter();
+    }
+
+    private void clearAdapter() {
         List<Weather> list = new ArrayList<Weather>();
-        RecyclerView.Adapter adapter = new WeatherAdapter(list, this);
         recyclerView.setAdapter(new WeatherAdapter(list, this));
         timestampFragment.setTimeStamp(" ");
     }
@@ -114,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.drop_db:
                 dropDb();
+                return true;
+            case R.id.clear:
+                clearAdapter();
                 return true;
         }
         return super.onOptionsItemSelected(item);

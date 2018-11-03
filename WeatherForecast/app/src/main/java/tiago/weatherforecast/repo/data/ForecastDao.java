@@ -23,7 +23,7 @@ public interface ForecastDao {
 
     @Query("SELECT * FROM forecastentity WHERE longitude LIKE :longitude AND "
             + "latitude LIKE :latitude LIMIT 1")
-    ForecastEntity FindByCoordinate(float longitude, float latitude);
+    ForecastEntity findByCoordinates(double longitude, double latitude);
 
     @Insert
     void insertAll(ForecastEntity... forecasts);

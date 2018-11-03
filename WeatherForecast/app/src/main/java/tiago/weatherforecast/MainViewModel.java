@@ -43,7 +43,7 @@ public class MainViewModel extends ViewModel {
         } else {
             Log.e(TAG, "not connected");
             Toast.makeText(context, "Offline: Data might be out of date.", Toast.LENGTH_LONG).show();
-            fetchFromDB();
+            fetchFromDB(longitude, latitude);
         }
     }
 
@@ -64,9 +64,9 @@ public class MainViewModel extends ViewModel {
         }.execute();
     }
 
-    private void fetchFromDB() {
+    private void fetchFromDB(double longitude, double latitude) {
         Log.w(TAG, "fetching from db...");
-        TaskFetchFromDB asyncTask = (TaskFetchFromDB) new TaskFetchFromDB() {
+        TaskFetchFromDB asyncTask = (TaskFetchFromDB) new TaskFetchFromDB(longitude, latitude) {
             @Override
             protected void onPostExecute(Forecast forecast) {
                 if (forecast == null) {

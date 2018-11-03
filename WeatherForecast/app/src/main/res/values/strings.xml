@@ -8,4 +8,5 @@
     <string name="approved_time">Approved Time:</string>
     <string name="_2018_08_12">2018-08-12</string>
     <string name="drop_db">Flush Database</string>
+    <string name="clear_screen">Clear screen</string>
 </resources>

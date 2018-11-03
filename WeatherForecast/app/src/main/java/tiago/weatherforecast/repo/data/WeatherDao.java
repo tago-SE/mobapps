@@ -24,4 +24,7 @@ public interface WeatherDao {
 
     @Query("DELETE FROM weatherentity")
     void dropAll();
+
+    @Query("DELETE FROM weatherentity WHERE forecast IN (:id)")
+    void deleteMatchingForecast(int id);
 }

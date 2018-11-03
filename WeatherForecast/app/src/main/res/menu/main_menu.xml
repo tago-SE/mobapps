@@ -11,5 +11,12 @@
         android:orderInCategory="100"
         android:title="@string/drop_db"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/clear"
+        android:title="@string/clear_screen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:showAsAction="never"
+        />
 
 </menu>
