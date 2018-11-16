@@ -14,10 +14,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
-import tiago.weatherforecast.repo.data.AppDatabase;
 import tiago.weatherforecast.repo.data.Forecast;
 import tiago.weatherforecast.repo.data.ForecastDao;
 import tiago.weatherforecast.repo.data.ForecastEntity;
@@ -25,14 +22,25 @@ import tiago.weatherforecast.repo.data.Weather;
 import tiago.weatherforecast.repo.data.WeatherDao;
 import tiago.weatherforecast.repo.data.WeatherEntity;
 
-
+/**
+ * Attemtps to collect weather data from thw web stored as JSON objects. The pulled data is then
+ * saved inside the application cache (db) before returned as a Forecast model. On failure it will
+ * however return null. Note that arguments are passed inside the constructor before execution of
+ * the AsynkTask.
+ */
 public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
 
     private final String TAG = "WeatherAsyncTask";
 
+
     private final double longitude;
     private final double latitude;
 
+    /**
+     * Constructor containing arguments for the web query.
+     * @param longitude longitude coordinate
+     * @param latitude latitude coordinate
+     */
     public TaskFetchFromWeb(double longitude, double latitude) {
         super();
         this.longitude = longitude;
@@ -40,6 +48,12 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
 
     }
 
+    /**
+     * Executes the web search based on the previously provided longitude and latitude data. If
+     * nothing is found or no connection was established it will return null.
+     * @param voids Arguments are passed inside the constructor parameter instead.
+     * @return a Forecast model or null if nothing is found.
+     */
     @Override
     protected Forecast doInBackground(Void... voids) {
         Log.w(TAG, "WeatherAsyncTask:started");
@@ -69,8 +83,6 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
             String reference = rootObj.getAsJsonPrimitive("referenceTime").toString();
             String approvedDate = approved.substring(1,11);
             String approvedTime = approved.substring(12, 17);
-            //double longitude = coordinates.get(0).getAsFloat();
-            //double latitude = coordinates.get(1).getAsFloat();
 
             forecast = new Forecast(
                     Double.parseDouble(sLong), Double.parseDouble(sLat), approvedDate, approvedTime);
@@ -98,9 +110,7 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         saveForecast(forecast);
-
         return forecast;
     }
 
@@ -132,6 +142,9 @@ public abstract class TaskFetchFromWeb extends AsyncTask<Void, Void, Forecast> {
         }
     }
 
-
+    /**
+     * Abstarct method created to handle the retrieved data.
+     * @param forecast Forecast model
+     */
     protected abstract void onPostExecute(Forecast forecast);
 }

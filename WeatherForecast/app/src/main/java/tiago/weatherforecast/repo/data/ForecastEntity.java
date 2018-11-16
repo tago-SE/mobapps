@@ -7,10 +7,6 @@ import android.support.annotation.NonNull;
 
 import java.util.Objects;
 
-
-/**
- * Forecast entity stored inside DB
- */
 @Entity
 public class ForecastEntity  {
 

@@ -1,4 +1,4 @@
-package tiago.weatherforecast;
+package tiago.weatherforecast.ui;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,15 +15,20 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import tiago.weatherforecast.R;
 import tiago.weatherforecast.repo.TaskFlushDB;
 import tiago.weatherforecast.repo.data.Forecast;
-import tiago.weatherforecast.repo.data.AppDatabase;
+import tiago.weatherforecast.repo.AppDatabase;
 import tiago.weatherforecast.repo.data.Weather;
 
+/**
+ * This is the Main activity, its responsible inflating the fragments it uses and injecting the
+ * shared ViewModel into the fragments so that they can be updated internally. It also instantiates
+ * the database reference with the necessary context.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Main";
-
 
     private RecyclerView recyclerView;
 
@@ -35,12 +39,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         // Shared View Model
         MainViewModel vm = ViewModelProviders.of(this).get(MainViewModel.class);
-
-        // remove long, lat?
-        // remove injection?
 
 
         SubmitFragment submitFragment = SubmitFragment.newInstance(0.00,0.00);

@@ -1,4 +1,4 @@
-package tiago.weatherforecast;
+package tiago.weatherforecast.ui;
 
 
 import android.content.Context;
@@ -13,23 +13,28 @@ import android.widget.TextView;
 import java.util.Hashtable;
 import java.util.List;
 
+import tiago.weatherforecast.R;
 import tiago.weatherforecast.repo.data.Weather;
 
 /**
- * Provide views to RecyclerView with data from DataSet.
+ * Provide views to RecyclerView with data from a weather forecast data set. .
  */
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHolder> {
 
     private static final String TAG = "WeatherAdapter";
 
-    private Hashtable<Integer, Drawable> skyHash;
+    /* Hash table containing resource mapping (index to image) */
+    private static Hashtable<Integer, Drawable> skyHash = null;
+    /* List of weather forecast items displayed */
     private List<Weather> items;
+    /* The context which the adapter belongs to */
     private Context context;
 
     public WeatherAdapter(List<Weather> items, Context context) {
         this.items = items;
         this.context = context;
-        setupSkyImages();
+        if (skyHash == null)
+            setupSkyImages();
     }
 
     private void setupSkyImages() {

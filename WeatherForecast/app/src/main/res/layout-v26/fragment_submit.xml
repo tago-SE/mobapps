@@ -5,7 +5,7 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="60dp"
-    tools:context=".SubmitFragment">
+    tools:context=".ui.SubmitFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
