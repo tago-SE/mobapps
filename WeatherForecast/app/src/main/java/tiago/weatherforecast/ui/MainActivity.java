@@ -60,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Create Database
         AppDatabase.buildDatabase(this);
+
+        // Fetch last forecast
+        vm.onStart(this);
+
+
+
     }
 
     /**

@@ -11,6 +11,9 @@ import java.util.List;
 @Dao
 public interface ForecastDao {
 
+    @Query("SELECT * FROM forecastentity ORDER BY id DESC LIMIT 1")
+    ForecastEntity getLast();
+
     @Query("Select * FROM forecastentity")
     List<ForecastEntity> getAll();
 

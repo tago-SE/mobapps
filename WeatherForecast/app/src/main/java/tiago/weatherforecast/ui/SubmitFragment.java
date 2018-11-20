@@ -61,7 +61,6 @@ public class SubmitFragment extends Fragment {
     public void injectMainViewModel(Context context, MainViewModel vm) {
         mainViewModel = vm;
         this.context = context;
-        pullDataPeriodically();
     }
 
     /**
@@ -80,6 +79,7 @@ public class SubmitFragment extends Fragment {
         return fragment;
     }
 
+    /*
     private void pullDataPeriodically() {
         elapsedSeconds = 0;
         final Handler handler = new Handler();
@@ -118,7 +118,7 @@ public class SubmitFragment extends Fragment {
         };
         handler.postDelayed(runnableCode, INTERVAL);
     }
-
+*/
     private boolean validateSubmission(boolean showError) {
         boolean valid = true;
         String errMsg = "";

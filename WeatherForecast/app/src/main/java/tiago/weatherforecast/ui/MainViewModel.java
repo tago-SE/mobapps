@@ -8,9 +8,13 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import tiago.weatherforecast.repo.TaskFetchFromDB;
+import tiago.weatherforecast.repo.TaskFetchLast;
 import tiago.weatherforecast.repo.data.Forecast;
 import tiago.weatherforecast.repo.TaskFetchFromWeb;
 import tiago.weatherforecast.repo.data.Weather;
@@ -51,6 +55,53 @@ public class MainViewModel extends ViewModel {
         }
     }
 
+    public void onStart(final Context context) {
+        new TaskFetchLast() {
+            @Override
+            protected void onPostExecute(Forecast forecast) {
+                Toast.makeText(context, "Refreshing...", Toast.LENGTH_LONG).show();
+                SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd hh:mm");
+                try {
+                    Date oldDate = dt.parse(forecast.date + " " + forecast.time);
+                    Date newDate = dt.parse(new SimpleDateFormat("yyyy-mm-dd hh:mm").format(new Date()));
+                    Log.w(TAG, oldDate.toString() + " " + newDate.toString());
+                    long diff = newDate.getTime() - oldDate.getTime();
+                    String s = "time:\n" + newDate.getTime() + "\n" + oldDate.getTime() + "\n" +
+                            diff;
+                    Log.w(TAG, s);
+                    if (diff >= 1000*60*60*2 && isConnected(context)) {
+
+                        new TaskFetchFromWeb(forecast.longitude, forecast.latitude) {
+                            @Override
+                            protected void onPostExecute(Forecast forecast) {
+                                if (forecast != null) {
+                                    publishForecast(forecast);
+                                    Toast.makeText(context, "New data...", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }.execute();
+                    } else {
+                        Toast.makeText(context, "Local data, may be out of date...", Toast.LENGTH_LONG).show();
+                        publishForecast(forecast);
+                    }
+                    Log.w(TAG, oldDate.toString() + " " + newDate.toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
+    }
+
+    private void publishForecast(Forecast forecast) {
+        if (forecast == null) {
+            Log.e(TAG, "No forecast found");
+            weatherList.postValue(null);
+            weatherForecast.postValue(null);
+        } else {
+            weatherList.postValue(forecast.items);
+            weatherForecast.postValue(forecast);
+        }
+    }
 
     private boolean isConnected(final Context context) {
         ConnectivityManager netManager = (ConnectivityManager) context.
@@ -64,14 +115,7 @@ public class MainViewModel extends ViewModel {
         TaskFetchFromWeb asyncTask = (TaskFetchFromWeb) new TaskFetchFromWeb(longitude, latitude) {
             @Override
             protected void onPostExecute(Forecast forecast) {
-                if (forecast == null) {
-                    Log.e(TAG, "No forecast found");
-                    weatherList.postValue(null);
-                    weatherForecast.postValue(null);
-                } else {
-                    weatherList.postValue(forecast.items);
-                    weatherForecast.postValue(forecast);
-                }
+                publishForecast(forecast);
             }
         }.execute();
     }
@@ -81,14 +125,7 @@ public class MainViewModel extends ViewModel {
         TaskFetchFromDB asyncTask = (TaskFetchFromDB) new TaskFetchFromDB(longitude, latitude) {
             @Override
             protected void onPostExecute(Forecast forecast) {
-                if (forecast == null) {
-                    Log.e(TAG, "No forecast found");
-                    weatherList.postValue(null);
-                    weatherForecast.postValue(null);
-                } else {
-                    weatherList.postValue(forecast.items);
-                    weatherForecast.postValue(forecast);
-                }
+                publishForecast(forecast);
             }
         }.execute();
     }
