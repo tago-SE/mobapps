@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -39,6 +40,8 @@ import java.util.ArrayList;
  * https://lancaster-university.github.io/microbit-docs/ble/profile/
  */
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "Main";
 
     public static final String BBC_MICRO_BIT = "BBC micro:bit";
 
@@ -95,8 +98,11 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // TODO:
+                    Log.w(TAG, "onRequestPermissionsResult OK" + requestCode);
+
                     // ...
                 } else {
+                    Log.w(TAG, "onRequestPermissionsResult NO" + requestCode);
                     // stop this activity
                     this.finish();
                 }
