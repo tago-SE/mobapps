@@ -74,31 +74,33 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case Surface.ROTATION_0:
                 x = event.values[0];
                 y = event.values[1];
+                z = event.values[2];
                 break;
             case Surface.ROTATION_90:
                 x = -event.values[1];
                 y = event.values[0];
+                z = event.values[2];
                 break;
             case Surface.ROTATION_180:
                 x = -event.values[0];
                 y = -event.values[1];
+                z = event.values[2];
                 break;
             case Surface.ROTATION_270:
                 x = event.values[1];
                 y = -event.values[0];
+                z = event.values[2];
                 break;
         }
-
         if (tvX != null) {
-            tvX.setText("" + x);
+            tvX.setText("" + (int) x);
         }
         if (tvY != null) {
-            tvY.setText("" + y);
+            tvY.setText("" + (int) y);
         }
         if (tvZ != null) {
-            tvZ.setText("" + z);
+            tvZ.setText("" + (int) z);
         }
-
     }
 
     @Override
