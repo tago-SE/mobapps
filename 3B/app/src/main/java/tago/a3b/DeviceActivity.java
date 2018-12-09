@@ -11,12 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -53,6 +52,7 @@ public class DeviceActivity extends AppCompatActivity {
     private BluetoothDevice mConnectedDevice = null;
     private BluetoothGatt mBluetoothGatt = null;
     private BluetoothGattService mUartService = null;
+    private BluetoothGattCharacteristic txCharac = null;
 
     private Handler mHandler; // callbacks executed on background thread (it seems)
 
@@ -61,30 +61,46 @@ public class DeviceActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mConnectedDevice = ConnectedDevice.getInstance();
-        if (mConnectedDevice != null) {
-            mDeviceView.setText(mConnectedDevice.toString());
+        //mConnectedDevice = ConnectedDevice.getInstance();
+        //if (mConnectedDevice != null) {
+         //   mDeviceView.setText(mConnectedDevice.toString());
             connect();
-        }
+        //}
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        stopSequence();
+        finish();
+    }
+
+    private void stopSequence() {
         if (mBluetoothGatt != null) {
+            // added
+            mBluetoothGatt.disconnect();
+
             mBluetoothGatt.close();
         }
         ConnectedDevice.removeInstance();
         mConnectedDevice = null;
-        finish();
     }
 
     private void connect() {
+        mConnectedDevice = ConnectedDevice.getInstance();
         if (mConnectedDevice != null) {
-            // register call backs for bluetooth gatt
+            mDeviceView.setText(mConnectedDevice.toString());
             mBluetoothGatt = mConnectedDevice.connectGatt(this, false, mBtGattCallback);
             Log.i("connect", "connectGatt called");
         }
+    }
+
+    private void disconnect() {
+        if (mBluetoothGatt != null) {
+            mBluetoothGatt.disconnect();
+            //mBluetoothGatt.close();
+        }
+        mConnectedDevice = null;
     }
 
     /**
@@ -100,6 +116,7 @@ public class DeviceActivity extends AppCompatActivity {
             if (newState == BluetoothGatt.STATE_CONNECTED) {
                 mBluetoothGatt = gatt;
                 gatt.discoverServices();
+
                 mHandler.post(new Runnable() {
                     public void run() {
                         mDataView.setText(getString(R.string.connected_msg));
@@ -135,7 +152,7 @@ public class DeviceActivity extends AppCompatActivity {
 
                     // Enable indications for UART data
                     // 1. Enable notification/indication on ble peripheral (Micro:bit)
-                    BluetoothGattCharacteristic txCharac =
+                    txCharac =
                             mUartService.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
                     BluetoothGattDescriptor descriptor =
                             txCharac.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG);
@@ -182,7 +199,7 @@ public class DeviceActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic
                 characteristic) {
-            Log.i("BluetoothGattCallback", "onCharacteristicChanged: " + characteristic.toString());
+           // Log.i("BluetoothGattCallback", "onCharacteristicChanged: " + characteristic.toString());
 
             // TODO: check which service and characteristic caused this call
             BluetoothGattCharacteristic uartTxCharacteristic =
@@ -193,30 +210,30 @@ public class DeviceActivity extends AppCompatActivity {
             mHandler.post(new Runnable() {
                 public void run() {
                     PulseManager pm = PulseManager.getInstance();
+
+                    if (pm.isFlukeDetected() && pm.getNumberFlukes() > 25) {
+                        pm.reset();
+                        mBluetoothGatt.setCharacteristicNotification(txCharac, false);
+                        showToast("Too much noice to detect heart rate...");
+                        Handler handler = new Handler();
+                        final Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                mBluetoothGatt.setCharacteristicNotification(txCharac, true);
+                                showToast("Trying again...");
+                            }
+                        };
+                        handler.postDelayed(runnable, 1000);
+                    }
+
                     try {
                         pm.addValue(Integer.parseInt(msg));
-                        Log.d(TAG, "bpm " + pm.beatsPerMin());
-                        GraphView graph = findViewById(R.id.graph);
-
-
-                        List<DataPoint> list = new ArrayList<>();
-                        int x = 0;
-                        for (Integer v : pm.values()) {
-                            list.add(new DataPoint(x, v));
-                            x++;
-                        }
-                        DataPoint[] dataPoints = new DataPoint[x];
-                        for (int i = 0; i < x; i++) {
-                            dataPoints[i] = list.get(i);
-                        }
-
-                        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dataPoints);
-                        graph.addSeries(series);
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    mDataView.setText(msg + " " + pm.beatsPerMin());
+                    mDataView.setText(msg + " " + pm.beatsPerMin() + ", " + pm.getLastBpm());
+                    //Log.w(TAG, msg);
+                    //mDataView.setText(msg);
                 }
             });
         }
@@ -254,5 +271,47 @@ public class DeviceActivity extends AppCompatActivity {
     protected void showToast(String msg) {
         Toast toast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.start:
+                Log.d(TAG, "START");
+                //connect();
+                mBluetoothGatt.setCharacteristicNotification(txCharac, true);
+                return true;
+            case R.id.stop:
+                Log.d(TAG, "STOP");
+                mBluetoothGatt.setCharacteristicNotification(txCharac, false);
+                //disconnect();
+                /*
+                stopSequence();
+
+                mBluetoothGatt = null;
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        mDataView.setText(getString(R.string.disconnected_msg));
+                    }
+                });
+                */
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (mBluetoothGatt != null && txCharac != null)
+            mBluetoothGatt.setCharacteristicNotification(txCharac, false);
+        disconnect();
+        finish();
     }
 }

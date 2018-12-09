@@ -1,5 +1,7 @@
 package tago.a3b;
 
+import android.util.Log;
+
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Date;
@@ -12,19 +14,24 @@ public class PulseManager {
         return ourInstance;
     }
 
+    private static final String TAG = "Pulse";
+
     private PulseManager() {
     }
 
     private Queue<Integer> pulseQueue = new ArrayDeque<>();
 
-    private Queue<Integer> valueQueue = new ArrayDeque<>();
-
-    private int bpm;
+    private int lastBpm;
 
     private double pulse;
     private double prevPulse;
 
-    private double a = 0.2;
+    private static final double TRESH = 520;
+    private double tresh = TRESH;
+    private double treshTop;
+    private double treshBot;
+
+    private double a = 0.5;
     private double b = 1.0 - a;
 
     private double topValue;
@@ -34,82 +41,106 @@ public class PulseManager {
 
     private long diffTime;
     private long prevTime;
-
-    private double prevMeanPulse;
+    private int peakCounter;
+    private int flukeCounter;
+    private boolean flukeDetected;
 
     public int beatsPerMin() {
-        if (pulseQueue.isEmpty())
+        if (pulseQueue.size() == 0)
             return 0;
-        int sum = 0;
-        for (Integer v : pulseQueue) {
-            sum += v;
-        }
-        int avg = sum/pulseQueue.size();
-        bpm = 60000/avg;
-        return bpm;
+        int totalTime = 0;
+        for (Integer timeDiff : pulseQueue)
+            totalTime += timeDiff;
+        int avgTime = totalTime/pulseQueue.size();
+        return 60000/avgTime;
     }
 
-    public void addValue(int value) {
-        valueQueue.offer(value);
-        if (valueQueue.size() > 100)
-            valueQueue.poll();
+    public int getLastBpm() {
+        return lastBpm;
+    }
 
-        pulse = value;
-        if (prevPulse == 0)
-            prevPulse = pulse;
+    public void addValue(int pulse) {
+    //    if (prevPulse == 0)
+    //        prevPulse = pulse;
 
-        double meanPulse = a*pulse + b*prevPulse;
+        double pulseFiltered = a*pulse + b*prevPulse;
+        beatDetected = false;
 
+        // Debug var
 
-
-        if (meanPulse > prevPulse) {
-
-
+        if (pulseFiltered > prevPulse) {
+            //Log.d(TAG, "increasing...");
             // increasing state
             if (prevIncrease == false) {
                 // previously decreasing, but now increasing
-                if (meanPulse < 651) {          // need to be dynamically set
-                    botValue = 10000;           // extremely high number
-                    // potential minimum value
+                if (prevPulse < tresh) {          // need to be dynamically set
+                    botValue = 1000;           // extremely high number
+
+                    //treshBot = pulseFiltered*1.2;
+                    //tresh = treshTop;
+                    System.out.println("bot");
+
                 }
             }
             prevIncrease = true;
-            topValue = meanPulse;
+            topValue = pulseFiltered;
         } else {
             // decreasing state
             if (prevIncrease == true) {
+                System.out.println("top");
                 // previously increasing, but now decreasing
-                if (meanPulse > 651) {
+                peakCounter++;
+                if (prevPulse > tresh) {
                     // potential maximum value
                     long curTime = System.currentTimeMillis();
                     diffTime = curTime - prevTime;
                     prevTime = curTime;
                     topValue = 0;
-                    // Add to stack
-                    pulseQueue.offer((int) diffTime);
-                    if (pulseQueue.size() > 10)
-                        pulseQueue.poll();
-                    bpm = beatsPerMin();
+
+                    // Time elapsed since last detected pulse
+                    //bpm = (int) (60000/diffTime);
+                    lastBpm = (int) (60000/diffTime);
+                    Log.e(TAG, "HEART BEAT " + lastBpm);
+
                     beatDetected = true;
+                    peakCounter = 0;
+
+                   // treshTop = pulseFiltered*0.8;
+                    //tresh = treshBot;
+
+                    // Add pulse to sum
+                    pulseQueue.offer((int) diffTime);
+                    if (pulseQueue.size() >= 10)
+                        pulseQueue.poll();
+                }
+                flukeDetected = false;
+                if (peakCounter > 3) {
+                    flukeDetected = true;
+                    flukeCounter++;
                 }
             }
             prevIncrease = false;
-            botValue = meanPulse;
+            botValue = pulseFiltered;
         }
-        System.out.println(beatDetected + " " + bpm + " " + meanPulse);
-        prevPulse = meanPulse;
+        System.out.println(lastBpm + " " + beatsPerMin() + " " + pulseFiltered);
+        prevPulse = pulseFiltered;
         beatDetected = false;
     }
 
-    public Collection<Integer> values() {
-        return valueQueue;
+    public boolean isFlukeDetected() {
+        return flukeDetected;
     }
 
+    public int getNumberFlukes() {
+        return flukeCounter;
+    }
 
-    public void clear() {
-        pulseQueue.clear();
+    public void reset() {
         pulse = 0;
         prevIncrease = false;
+        flukeCounter = 0;
+        tresh = treshTop = treshBot = TRESH;
+        pulseQueue.clear();
     }
 
 }
