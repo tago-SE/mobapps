@@ -19,11 +19,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final String TAG = "Main";
 
-    // CONST 57.2957795f
-
-    private TextView tvX;
-    private TextView tvY;
-    private TextView tvZ;
     private TextView tvA;
 
     final Handler handler = new Handler();
@@ -58,9 +53,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
-        tvX = findViewById(R.id.x);
-        tvY = findViewById(R.id.y);
-        tvZ = findViewById(R.id.z);
         tvA = findViewById(R.id.angle);
 
         sensorManager= (SensorManager) getSystemService(this.SENSOR_SERVICE);
@@ -119,15 +111,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             break;
             case Sensor.TYPE_ACCELEROMETER: {
                 accels = event.values.clone();
-                // Shake detection
                 long curTime = System.currentTimeMillis();
                 if (curTime - lastUpdate > 1) {
                     long diffTime = curTime - lastUpdate;
                     lastUpdate = curTime;
                     values = event.values.clone();
-                    x = values[0];
-                    y = values[1];
-                    z = values[2];
+
+                    // Filter
+                    x = F*lastX + (1 - F)*values[0];
+                    y = F*lastY + (1 - F)*values[1];
+                    z = F*lastZ + (1 - F)*values[2];
+
+                    // Display angle
+                    // CONST 57.2957795f alternative????
+                    double k = 90 / 9.82;
+                    double angle = Math.atan2(x * k, z * k) * 180 / Math.PI;
+                    if (tvA != null)
+                        tvA.setText("" + (int) angle + " °");
+                    // Shake detection
                     double delta = Math.abs(x + y + z - lastX - lastY - lastZ);
                     double speed = delta / diffTime * 10000.;
                     Log.d(TAG, "" + delta + " " + speed + " " + SHAKE_TRESHOLD);
@@ -146,9 +147,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             Log.d(TAG, "SUCCESS");
                         }
                     }
+
+
                     lastX = x;
                     lastY = y;
                     lastZ = z;
+
+
+
                 }
             }
             break;
