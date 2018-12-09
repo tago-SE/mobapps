@@ -26,6 +26,9 @@ public class PulseManager {
     private double pulse;
     private double prevPulse;
 
+    private static final int MIN_HEART_RATE = 30;
+    private static final int MAX_HEART_RATE = 150;
+
     private static final double TRESH = 520;
     private double tresh = TRESH;
     private double treshTop;
@@ -37,7 +40,7 @@ public class PulseManager {
     private double topValue;
     private double botValue;
     private boolean prevIncrease = false;
-    private boolean beatDetected = false;
+
 
     private long diffTime;
     private long prevTime;
@@ -64,7 +67,6 @@ public class PulseManager {
     //        prevPulse = pulse;
 
         double pulseFiltered = a*pulse + b*prevPulse;
-        beatDetected = false;
 
         // Debug var
 
@@ -99,19 +101,22 @@ public class PulseManager {
 
                     // Time elapsed since last detected pulse
                     //bpm = (int) (60000/diffTime);
-                    lastBpm = (int) (60000/diffTime);
-                    Log.e(TAG, "HEART BEAT " + lastBpm);
 
-                    beatDetected = true;
+                    lastBpm = (int) (60000/diffTime);
+                    if (lastBpm > MIN_HEART_RATE && lastBpm < MAX_HEART_RATE) {
+                        pulseQueue.offer((int) diffTime);
+                        if (pulseQueue.size() >= 10)
+                            pulseQueue.poll();
+                    } else {
+                        flukeCounter++;
+                    }
+                    Log.e(TAG, "HEART BEAT " + lastBpm);
                     peakCounter = 0;
 
                    // treshTop = pulseFiltered*0.8;
                     //tresh = treshBot;
 
                     // Add pulse to sum
-                    pulseQueue.offer((int) diffTime);
-                    if (pulseQueue.size() >= 10)
-                        pulseQueue.poll();
                 }
                 flukeDetected = false;
                 if (peakCounter > 3) {
@@ -124,7 +129,6 @@ public class PulseManager {
         }
         System.out.println(lastBpm + " " + beatsPerMin() + " " + pulseFiltered);
         prevPulse = pulseFiltered;
-        beatDetected = false;
     }
 
     public boolean isFlukeDetected() {
