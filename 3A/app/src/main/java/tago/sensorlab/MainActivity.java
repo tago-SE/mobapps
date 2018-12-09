@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double z = 0;
     private double lastX, lastY, lastZ;
 
-    private final double SHAKE_TRESHOLD = 600;
+    private final double SHAKE_TRESHOLD = 800;
 
     private double F = 0.3;
 
@@ -123,9 +123,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     z = F*lastZ + (1 - F)*values[2];
 
                     // Display angle
-                    // CONST 57.2957795f alternative????
-                    double k = 90 / 9.82;
-                    double angle = Math.atan2(x * k, z * k) * 180 / Math.PI;
+                    // 57.2957795f alternative????
+
+                    // Omit gravity
+                    // double k = 90 / 9.82;
+                    double angle = Math.toDegrees(Math.atan2(x, z));
                     if (tvA != null)
                         tvA.setText("" + (int) angle + " °");
                     // Shake detection
@@ -147,17 +149,48 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             Log.d(TAG, "SUCCESS");
                         }
                     }
-
-
                     lastX = x;
                     lastY = y;
                     lastZ = z;
-
-
-
                 }
             }
             break;
+        }
+    }
+        /*
+        if (mags != null && accels != null) {
+            gravity = new float[9];
+            magnetic = new float[9];
+            // Computes the inclination matrix I (magnetic) and rotation matrix R (gravity)
+            // transforming a vector from the device coordinate system to the worlds coordinate
+            // system, which is defined as a direct orthonormal  basis where:
+            // x == vector product Y.Z
+            // y == tangential to the ground at the devices current location
+            // z == points towards the sky
+            SensorManager.getRotationMatrix(gravity, magnetic, accels, mags);
+
+
+            //float[] outGravity = new float[9];
+            //SensorManager.remapCoordinateSystem(gravity, SensorManager.AXIS_X,SensorManager.AXIS_Z, outGravity);
+
+            SensorManager.getOrientation(gravity, values);
+
+            double inclination = Math.toDegrees(SensorManager.getInclination(gravity));
+
+            double rotation = Math.toDegrees(SensorManager.getRotati);
+           // double k = 90 / 9.82;
+            //double angle = Math.atan2(x * k, z * k) * 180 / Math.PI;
+            if (tvA != null)
+                tvA.setText("" + (int) inclination + " °");
+
+
+            azimuth = values[0];
+            pitch = values[1];
+            roll = values[2];
+            mags = null;
+            accels = null;
+            Log.d(TAG, (pitch + " " + Math.toDegrees(values[1])));
+
         }
 
 
@@ -208,34 +241,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Log.d(TAG, " " + Math.round(inclination) + " " + (int) rotation + " " +  SensorManager.getInclination(f));
                 long curTime = System.currentTimeMillis();
             } break; */
-        }
-        /*
-        if (mags != null && accels != null) {
-            gravity = new float[9];
-            magnetic = new float[9];
-            // Computes the inclination matrix I (magnetic) and rotation matrix R (gravity)
-            // transforming a vector from the device coordinate system to the worlds coordinate
-            // system, which is defined as a direct orthonormal  basis where:
-            // x == vector product Y.Z
-            // y == tangential to the ground at the devices current location
-            // z == points towards the sky
-            SensorManager.getRotationMatrix(gravity, magnetic, accels, mags);
 
-
-            //float[] outGravity = new float[9];
-            //SensorManager.remapCoordinateSystem(gravity, SensorManager.AXIS_X,SensorManager.AXIS_Z, outGravity);
-            SensorManager.getOrientation(gravity, values);
-
-
-
-            azimuth = values[0];
-            pitch = values[1];
-            roll = values[2];
-            mags = null;
-            accels = null;
-            Log.d(TAG, (pitch + " " + Math.toDegrees(values[1])));
-            */
-        //}
 
 
 
