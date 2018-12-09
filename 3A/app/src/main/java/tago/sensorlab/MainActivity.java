@@ -89,10 +89,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         };
         handler.post(runnable);
-
-
-
-
     }
 
     @Override
@@ -119,12 +115,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (event.sensor.getType()) {
             case Sensor.TYPE_MAGNETIC_FIELD: {
                 mags = event.values.clone();
-            } break;
+            }
+            break;
             case Sensor.TYPE_ACCELEROMETER: {
                 accels = event.values.clone();
                 // Shake detection
                 long curTime = System.currentTimeMillis();
-                if (curTime - lastUpdate > 30) {
+                if (curTime - lastUpdate > 1) {
                     long diffTime = curTime - lastUpdate;
                     lastUpdate = curTime;
                     values = event.values.clone();
@@ -133,12 +130,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     z = values[2];
                     double delta = Math.abs(x + y + z - lastX - lastY - lastZ);
                     double speed = delta / diffTime * 10000.;
-                    //Log.d(TAG, "" + delta + " " + speed + " " + SHAKE_TRESHOLD);
+                    Log.d(TAG, "" + delta + " " + speed + " " + SHAKE_TRESHOLD);
                     if (speed > SHAKE_TRESHOLD) {
                         if (lastShake + 200 < curTime) {
                             lastShake = 0;
                             firstShake = 0;
-                            //tvA.setTextColor(Color.BLACK);
                         }
                         if (firstShake == 0) {
                             firstShake = curTime;
@@ -154,11 +150,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     lastY = y;
                     lastZ = z;
                 }
-                float[] g = event.values.clone();
+            }
+            break;
+        }
+
+
+            /*
+            float[] g = event.values.clone();
                 float norm_Of_g = (float) Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
-
-                Log.d(TAG, "norm_of_g " + norm_Of_g);
-
                 g[0] = g[0] / norm_Of_g;
                 g[1] = g[1] / norm_Of_g;
                 g[2] = g[2] / norm_Of_g;
@@ -173,18 +172,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 float[] f = new float[3];
                 f[0] = g[0]; f[1] = g[1]; f[2] = g[2];
-
-
-                Log.d(TAG, " " + Math.round(inclination) + " " + (int) rotation + " ");
+                Log.d(TAG, " " + Math.round(inclination) + " " + (int) rotation + " " +  SensorManager.getInclination(f));
 
                 double k = 90 / 9.82;
-                double angle = Math.atan2(x * k, z * k) * 180 / Math.PI;
+                double degree = Math.atan2(x * k, z * k) * 180 / Math.PI;
 
                 if (tvA != null)
-                    tvA.setText("" + (int) angle + " " + (int) inclination + " " + (int ) rotation);
-            } break;
-
-
+                    tvA.setText("" + (int) degree + " " + inc);
+             */
 
 
             /*
@@ -208,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 long curTime = System.currentTimeMillis();
             } break; */
         }
+        /*
         if (mags != null && accels != null) {
             gravity = new float[9];
             magnetic = new float[9];
@@ -232,7 +228,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mags = null;
             accels = null;
             Log.d(TAG, (pitch + " " + Math.toDegrees(values[1])));
-        }
+            */
+        //}
 
 
 
@@ -277,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }
  */
-    }
+    //}
 
 
     @Override
