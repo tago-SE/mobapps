@@ -14,7 +14,12 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +55,8 @@ public class DeviceActivity extends AppCompatActivity {
     private BluetoothGattService mUartService = null;
 
     private Handler mHandler; // callbacks executed on background thread (it seems)
+
+    private static final String TAG = "DeviceActivity";
 
     @Override
     protected void onStart() {
@@ -185,8 +192,31 @@ public class DeviceActivity extends AppCompatActivity {
             final String msg = uartTxCharacteristic.getStringValue(0);
             mHandler.post(new Runnable() {
                 public void run() {
-                    showToast(msg);
-                    mDataView.setText(msg);
+                    PulseManager pm = PulseManager.getInstance();
+                    try {
+                        pm.addValue(Integer.parseInt(msg));
+                        Log.d(TAG, "bpm " + pm.beatsPerMin());
+                        GraphView graph = findViewById(R.id.graph);
+
+
+                        List<DataPoint> list = new ArrayList<>();
+                        int x = 0;
+                        for (Integer v : pm.values()) {
+                            list.add(new DataPoint(x, v));
+                            x++;
+                        }
+                        DataPoint[] dataPoints = new DataPoint[x];
+                        for (int i = 0; i < x; i++) {
+                            dataPoints[i] = list.get(i);
+                        }
+
+                        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dataPoints);
+                        graph.addSeries(series);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    mDataView.setText(msg + " " + pm.beatsPerMin());
                 }
             });
         }
